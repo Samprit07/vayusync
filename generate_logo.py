@@ -1,0 +1,121 @@
+﻿import os
+
+# --- 1. DARK MODE CREST (Luminous Cyan & Amber on Obsidian) ---
+dark_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <linearGradient id="solarDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="60%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="160" height="160" rx="16" fill="#090d16"/>
+  <rect x="1.5" y="1.5" width="157" height="157" rx="14.5" fill="none" stroke="#1e2638" stroke-width="1.5"/>
+
+  <!-- [5] BAROMETRIC PRESSURE: Peripheral Isobar Arc -->
+  <path d="M 30 42 A 66 66 0 0 1 136 48" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="3 5"/>
+  <line x1="80" y1="10" x2="80" y2="18" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- [1] SURFACE TEMPERATURE: Solar Disc & Radial Rays (Only pointing Up & East) -->
+  <circle cx="106" cy="54" r="18" fill="url(#solarDark)"/>
+  <g stroke="#f59e0b" stroke-width="3" stroke-linecap="round">
+    <line x1="106" y1="28" x2="106" y2="16"/>
+    <line x1="124" y1="36" x2="134" y2="24"/>
+    <line x1="130" y1="54" x2="146" y2="54"/>
+    <line x1="126" y1="68" x2="140" y2="76" stroke-dasharray="4 4"/>
+    <line x1="116" y1="29" x2="122" y2="20" stroke="#fef08a" stroke-width="2"/>
+  </g>
+
+  <!-- [3] RELATIVE HUMIDITY: Cloud Body (Opaque Fill prevents Ray Bleed) -->
+  <path d="M 52 92
+           C 42 92, 36 84, 38 74
+           C 40 66, 48 62, 56 63
+           C 60 50, 76 46, 86 54
+           C 92 48, 104 50, 108 60
+           C 116 62, 120 70, 118 78
+           C 116 88, 108 92, 98 92 Z"
+        fill="#0f172a" stroke="#38bdf8" stroke-width="3.5" stroke-linejoin="round" filter="url(#glowCyan)"/>
+
+  <!-- [2] NEUTRAL WIND SPEED: Left-Flank Laminar Streaks (Terminating before cloud) -->
+  <g stroke="#00f2fe" stroke-width="3" stroke-linecap="round" filter="url(#glowCyan)">
+    <line x1="12" y1="70" x2="30" y2="70"/>
+    <line x1="8" y1="79" x2="32" y2="79"/>
+    <circle cx="32" cy="79" r="2" fill="#fff"/>
+    <line x1="16" y1="88" x2="34" y2="88"/>
+  </g>
+
+  <!-- [4] PRECIPITATION RATE: Downward Rain Shafts (Below Cloud Base) -->
+  <g stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round">
+    <line x1="56" y1="104" x2="50" y2="120"/>
+    <line x1="72" y1="104" x2="66" y2="122"/>
+    <line x1="88" y1="104" x2="82" y2="120"/>
+  </g>
+</svg>"""
+
+# --- 2. LIGHT MODE CREST (High-Contrast Cobalt, Deep Amber & Crisp White) ---
+light_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <linearGradient id="solarLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="160" height="160" rx="16" fill="#f8fafc"/>
+  <rect x="1.5" y="1.5" width="157" height="157" rx="14.5" fill="none" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- [5] BAROMETRIC PRESSURE: Peripheral Isobar Arc -->
+  <path d="M 30 42 A 66 66 0 0 1 136 48" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3 5"/>
+  <line x1="80" y1="10" x2="80" y2="18" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- [1] SURFACE TEMPERATURE: Solar Disc & Radial Rays -->
+  <circle cx="106" cy="54" r="18" fill="url(#solarLight)"/>
+  <g stroke="#d97706" stroke-width="3" stroke-linecap="round">
+    <line x1="106" y1="28" x2="106" y2="16"/>
+    <line x1="124" y1="36" x2="134" y2="24"/>
+    <line x1="130" y1="54" x2="146" y2="54"/>
+    <line x1="126" y1="68" x2="140" y2="76" stroke-dasharray="4 4"/>
+    <line x1="116" y1="29" x2="122" y2="20" stroke="#f59e0b" stroke-width="2"/>
+  </g>
+
+  <!-- [3] RELATIVE HUMIDITY: Cloud Body (Clean White Fill with Deep Navy Stroke) -->
+  <path d="M 52 92
+           C 42 92, 36 84, 38 74
+           C 40 66, 48 62, 56 63
+           C 60 50, 76 46, 86 54
+           C 92 48, 104 50, 108 60
+           C 116 62, 120 70, 118 78
+           C 116 88, 108 92, 98 92 Z"
+        fill="#ffffff" stroke="#0f172a" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <!-- [2] NEUTRAL WIND SPEED: Left-Flank Laminar Streaks -->
+  <g stroke="#0284c7" stroke-width="3" stroke-linecap="round">
+    <line x1="12" y1="70" x2="30" y2="70"/>
+    <line x1="8" y1="79" x2="32" y2="79"/>
+    <circle cx="32" cy="79" r="2" fill="#0f172a"/>
+    <line x1="16" y1="88" x2="34" y2="88"/>
+  </g>
+
+  <!-- [4] PRECIPITATION RATE: Downward Rain Shafts -->
+  <g stroke="#2563eb" stroke-width="3.5" stroke-linecap="round">
+    <line x1="56" y1="104" x2="50" y2="120"/>
+    <line x1="72" y1="104" x2="66" y2="122"/>
+    <line x1="88" y1="104" x2="82" y2="120"/>
+  </g>
+</svg>"""
+
+with open(os.path.join("frontend", "logo-dark.svg"), "w", encoding="utf-8") as f:
+    f.write(dark_svg)
+
+with open(os.path.join("frontend", "logo-light.svg"), "w", encoding="utf-8") as f:
+    f.write(light_svg)
+
+print("Generated de-conflicted logo-dark.svg and logo-light.svg successfully.")

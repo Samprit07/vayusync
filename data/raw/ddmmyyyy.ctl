@@ -1,0 +1,10 @@
+DSET p:\ddmmyyyy.grd
+TITLE 0.25 degranalyzed normal grids
+UNDEF -999.0
+XDEF  241  LINEAR  50.0 0.25
+YDEF  281  LINEAR  -30.0 0.25
+ZDEF   1 linear 1 1 
+TDEF 1 LINEAR 1jun2014 1DY
+VARS  1
+rf 0 99 GRIDDED RAINFALL
+ENDVARS
