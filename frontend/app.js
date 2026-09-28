@@ -253,3 +253,4 @@ varSelect.addEventListener("change", () => loadStation(currentCityName));
 applyTheme(currentTheme);
 loadStation("Panaji");
 
+

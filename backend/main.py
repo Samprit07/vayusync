@@ -53,9 +53,6 @@ def save_disk_cache(cache):
 
 STATION_CACHE = load_disk_cache()
 
-# ==============================================================================
-# AUTHORITATIVE METROPOLITAN & DISTRICT REGISTRY (Instant 0ms Resolution)
-# ==============================================================================
 MASTER_METRO_REGISTRY = {
     "bandra": (19.06, 72.84, "Bandra, Mumbai (Maharashtra)"),
     "bandra west": (19.06, 72.83, "Bandra West, Mumbai (MH)"),
@@ -234,10 +231,12 @@ def get_station(query: str = "Panaji", lead_time: str = "+24h", variable: str = 
         }
     }
 
-# Mount static frontend
-STATIC_DIR = os.path.join(PROJECT_ROOT, "frontend")
-if not os.path.exists(STATIC_DIR):
-    STATIC_DIR = os.path.join(PROJECT_ROOT, "public")
+# Check for index.html in available static directories
+static_target = None
+for candidate in [os.path.join(PROJECT_ROOT, "public"), os.path.join(PROJECT_ROOT, "frontend")]:
+    if os.path.exists(os.path.join(candidate, "index.html")):
+        static_target = candidate
+        break
 
-if os.path.exists(STATIC_DIR):
-    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
+if static_target:
+    app.mount("/", StaticFiles(directory=static_target, html=True), name="static")
