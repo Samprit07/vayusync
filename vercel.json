@@ -1,6 +1,8 @@
 ﻿{
   "functions": {
     "api/index.py": {
+      "maxDuration": 10,
+      "memory": 1024,
       "includeFiles": [
         "data/full_weather_cube.npy",
         "data/india_gazetteer.db"
@@ -12,5 +14,5 @@
       "source": "/api/(.*)",
       "destination": "/api/index.py"
     }
-  ]
+]
 }
