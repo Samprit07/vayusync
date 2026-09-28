@@ -1,7 +1,10 @@
 ﻿{
   "functions": {
     "api/index.py": {
-      "includeFiles": "data/**"
+      "includeFiles": [
+        "data/full_weather_cube.npy",
+        "data/india_gazetteer.db"
+      ]
     }
   },
   "rewrites": [
