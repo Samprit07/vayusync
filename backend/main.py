@@ -14,6 +14,7 @@ for path in [CURRENT_DIR, PROJECT_ROOT]:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import numpy as np
 import difflib
 from ml_engine import compute_ml_blend
@@ -32,11 +33,7 @@ data_cube_path = os.path.join(PROJECT_ROOT, "data", "full_weather_cube.npy")
 data_cube = np.load(data_cube_path, allow_pickle=True).item()
 
 DB_PATH = os.path.join(PROJECT_ROOT, "data", "india_gazetteer.db")
-
-# Use /tmp on Vercel/Serverless for writable disk operations
-IS_VERCEL = bool(os.environ.get("VERCEL"))
-CACHE_DIR = "/tmp" if IS_VERCEL else os.path.join(PROJECT_ROOT, "data")
-CACHE_PATH = os.path.join(CACHE_DIR, "resolved_stations.json")
+CACHE_PATH = os.path.join(PROJECT_ROOT, "data", "resolved_stations.json")
 
 def load_disk_cache():
     if os.path.exists(CACHE_PATH):
@@ -60,7 +57,6 @@ STATION_CACHE = load_disk_cache()
 # AUTHORITATIVE METROPOLITAN & DISTRICT REGISTRY (Instant 0ms Resolution)
 # ==============================================================================
 MASTER_METRO_REGISTRY = {
-    # Mumbai Metropolitan Region (MMR) & Maharashtra
     "bandra": (19.06, 72.84, "Bandra, Mumbai (Maharashtra)"),
     "bandra west": (19.06, 72.83, "Bandra West, Mumbai (MH)"),
     "bandra east": (19.06, 72.85, "Bandra East, Mumbai (MH)"),
@@ -72,112 +68,34 @@ MASTER_METRO_REGISTRY = {
     "powai": (19.12, 72.91, "Powai, Mumbai (MH)"),
     "kurla": (19.07, 72.88, "Kurla, Mumbai (MH)"),
     "chembur": (19.05, 72.90, "Chembur, Mumbai (MH)"),
-    "malad": (19.19, 72.85, "Malad, Mumbai (MH)"),
-    "goregaon": (19.16, 72.85, "Goregaon, Mumbai (MH)"),
-    "ghatkopar": (19.08, 72.91, "Ghatkopar, Mumbai (MH)"),
-    "mulund": (19.17, 72.96, "Mulund, Mumbai (MH)"),
-    "kandivali": (19.20, 72.85, "Kandivali, Mumbai (MH)"),
-    "santacruz": (19.08, 72.84, "Santacruz, Mumbai (MH)"),
-    "vile parle": (19.10, 72.84, "Vile Parle, Mumbai (MH)"),
-    "worli": (19.01, 72.82, "Worli, Mumbai (MH)"),
-    "marine drive": (18.94, 72.82, "Marine Drive, Mumbai (MH)"),
-    "thane": (19.22, 72.98, "Thane, Maharashtra"),
-    "navi mumbai": (19.03, 73.02, "Navi Mumbai, Maharashtra"),
-    "vashi": (19.07, 72.99, "Vashi, Navi Mumbai (MH)"),
     "mumbai": (19.08, 72.88, "Mumbai, Maharashtra"),
     "pune": (18.52, 73.86, "Pune, Maharashtra"),
     "nagpur": (21.15, 79.08, "Nagpur, Maharashtra"),
-    "nashik": (19.99, 73.79, "Nashik, Maharashtra"),
-    "solapur": (17.66, 75.91, "Solapur, Maharashtra"),
-    "kolhapur": (16.70, 74.24, "Kolhapur, Maharashtra"),
-
-    # Delhi NCR & North
     "delhi": (28.61, 77.20, "New Delhi, NCT"),
     "new delhi": (28.61, 77.20, "New Delhi, NCT"),
     "connaught place": (28.63, 77.22, "Connaught Place, Delhi"),
-    "karol bagh": (28.65, 77.19, "Karol Bagh, Delhi"),
-    "dwarka": (28.59, 77.05, "Dwarka, Delhi"),
-    "rohini": (28.71, 77.11, "Rohini, Delhi"),
-    "saket": (28.52, 77.21, "Saket, Delhi"),
-    "hauz khas": (28.55, 77.20, "Hauz Khas, Delhi"),
     "noida": (28.54, 77.39, "Noida, Uttar Pradesh"),
-    "greater noida": (28.47, 77.50, "Greater Noida, UP"),
     "gurgaon": (28.46, 77.03, "Gurugram (Gurgaon), Haryana"),
     "gurugram": (28.46, 77.03, "Gurugram, Haryana"),
-    "faridabad": (28.41, 77.32, "Faridabad, Haryana"),
-    "ghaziabad": (28.67, 77.45, "Ghaziabad, Uttar Pradesh"),
     "chandigarh": (30.73, 76.78, "Chandigarh UT"),
-    "amritsar": (31.63, 74.87, "Amritsar, Punjab"),
-    "ludhiana": (30.90, 75.86, "Ludhiana, Punjab"),
     "kashmir": (34.08, 74.80, "Srinagar (Kashmir Valley)"),
     "srinagar": (34.08, 74.80, "Srinagar, J&K"),
-    "jammu": (32.73, 74.86, "Jammu, J&K"),
-    "ladakh": (34.15, 77.58, "Leh, Ladakh"),
-    "leh": (34.15, 77.58, "Leh, Ladakh"),
-    "shimla": (31.10, 77.17, "Shimla, Himachal Pradesh"),
-    "dehradun": (30.32, 78.03, "Dehradun, Uttarakhand"),
-    "jaipur": (26.91, 75.79, "Jaipur, Rajasthan"),
-    "lucknow": (26.85, 80.95, "Lucknow, Uttar Pradesh"),
-    "kanpur": (26.45, 80.33, "Kanpur, Uttar Pradesh"),
-    "varanasi": (25.32, 82.97, "Varanasi, Uttar Pradesh"),
-
-    # Bengaluru & South
     "bengaluru": (12.97, 77.59, "Bengaluru, Karnataka"),
     "bangalore": (12.97, 77.59, "Bengaluru, Karnataka"),
-    "whitefield": (12.97, 77.75, "Whitefield, Bengaluru (KA)"),
-    "koramangala": (12.93, 77.62, "Koramangala, Bengaluru (KA)"),
-    "indiranagar": (12.98, 77.64, "Indiranagar, Bengaluru (KA)"),
-    "jayanagar": (12.93, 77.58, "Jayanagar, Bengaluru (KA)"),
-    "electronic city": (12.84, 77.66, "Electronic City, Bengaluru (KA)"),
-    "hsr layout": (12.91, 77.64, "HSR Layout, Bengaluru (KA)"),
-    "mysuru": (12.30, 76.65, "Mysuru (Mysore), Karnataka"),
-    "mangalore": (12.91, 74.86, "Mangalore, Karnataka"),
-    "hubli": (15.36, 75.12, "Hubballi, Karnataka"),
-    "belgaum": (15.85, 74.50, "Belagavi, Karnataka"),
     "chennai": (13.08, 80.27, "Chennai, Tamil Nadu"),
-    "t nagar": (13.04, 80.23, "T. Nagar, Chennai (TN)"),
-    "coimbatore": (11.02, 76.96, "Coimbatore, Tamil Nadu"),
     "hyderabad": (17.38, 78.48, "Hyderabad, Telangana"),
-    "hitec city": (17.44, 78.38, "HITEC City, Hyderabad (TG)"),
-    "secunderabad": (17.44, 78.50, "Secunderabad, Telangana"),
-    "visakhapatnam": (17.69, 83.22, "Visakhapatnam, Andhra Pradesh"),
-    "kochi": (9.93, 76.27, "Kochi, Kerala"),
-    "thiruvananthapuram": (8.52, 76.94, "Thiruvananthapuram, Kerala"),
-
-    # Goa Localities
     "goa": (15.49, 73.83, "Goa (HQ: Panaji)"),
     "panaji": (15.49, 73.83, "Panaji, Goa"),
     "panjim": (15.49, 73.83, "Panaji (Panjim), Goa"),
     "margao": (15.28, 73.99, "Margao, Goa"),
     "vasco": (15.40, 73.81, "Vasco da Gama, Goa"),
-    "vasco da gama": (15.40, 73.81, "Vasco da Gama, Goa"),
     "veroda": (15.19, 73.99, "Veroda, Goa"),
-    "varoda": (15.19, 73.99, "Veroda (Varoda), Goa"),
     "cuncolim": (15.18, 73.99, "Cuncolim, Goa"),
-    "cavorem": (15.22, 74.07, "Cavorem, Goa"),
-    "mapusa": (15.60, 73.81, "Mapusa, Goa"),
-    "ponda": (15.40, 74.02, "Ponda, Goa"),
-    "farmagudi": (15.42, 74.01, "Farmagudi, Goa"),
-
-    # East & North-East
     "kolkata": (22.57, 88.36, "Kolkata, West Bengal"),
-    "salt lake": (22.58, 88.42, "Salt Lake, Kolkata (WB)"),
-    "new town": (22.59, 88.48, "New Town, Kolkata (WB)"),
-    "howrah": (22.59, 88.31, "Howrah, West Bengal"),
     "jalpaiguri": (26.52, 88.73, "Jalpaiguri, West Bengal"),
     "siliguri": (26.72, 88.43, "Siliguri, West Bengal"),
     "patna": (25.59, 85.14, "Patna, Bihar"),
-    "ranchi": (23.34, 85.31, "Ranchi, Jharkhand"),
-    "bhubaneswar": (20.30, 85.82, "Bhubaneswar, Odisha"),
-    "guwahati": (26.14, 91.74, "Guwahati, Assam"),
-
-    # Gujarat & Central India
-    "ahmedabad": (23.02, 72.57, "Ahmedabad, Gujarat"),
-    "surat": (21.17, 72.83, "Surat, Gujarat"),
-    "vadodara": (22.31, 73.18, "Vadodara, Gujarat"),
-    "bhopal": (23.26, 77.41, "Bhopal, Madhya Pradesh"),
-    "indore": (22.72, 75.86, "Indore, Madhya Pradesh"),
-    "raipur": (21.25, 81.63, "Raipur, Chhattisgarh")
+    "ahmedabad": (23.02, 72.57, "Ahmedabad, Gujarat")
 }
 
 def query_online_geocoder(query_str):
@@ -316,9 +234,10 @@ def get_station(query: str = "Panaji", lead_time: str = "+24h", variable: str = 
         }
     }
 
-# Local development static mount fallback (only runs if not deployed to Vercel CDN)
-if not IS_VERCEL:
-    from fastapi.staticfiles import StaticFiles
-    PUBLIC_DIR = os.path.join(PROJECT_ROOT, "public")
-    if os.path.exists(PUBLIC_DIR):
-        app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="public")
+# Mount static frontend
+STATIC_DIR = os.path.join(PROJECT_ROOT, "frontend")
+if not os.path.exists(STATIC_DIR):
+    STATIC_DIR = os.path.join(PROJECT_ROOT, "public")
+
+if os.path.exists(STATIC_DIR):
+    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
