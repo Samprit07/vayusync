@@ -90,7 +90,7 @@ VayuSync is designed for **monsoon-season operations** where decisions must be f
 
 ```bash
 # 1. Clone
-git clone https://github.com/YOUR_USERNAME/vayusync.git
+git clone https://github.com/samprit07/vayusync.git
 cd vayusync
 
 # 2. Environment
