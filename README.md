@@ -3,7 +3,7 @@
 ### Sub-district meteorological synthesis & real-time monsoonal intelligence engine
 
 <p align="center">
-  <img src="https://img.shields.io/badge/SIH-2026-7C3AED?style=for-the-badge" alt="SIH 2026"/>
+  <img src="https://img.shields.io/badge/SIH-2026-7C3AED?style=for-the-badge" alt="SIH 26081"/>
   <img src="https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.14"/>
   <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/NumPy-SIMD%20Vectorized-013243?style=for-the-badge&logo=numpy&logoColor=white" alt="NumPy SIMD"/>
