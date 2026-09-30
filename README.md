@@ -1,29 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Downloading VayuSync README.md...</title>
-  <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #0B1329; color: #F8FAFC; text-align: center; padding: 60px 20px; }
-    .card { background: #1E293B; border: 2px solid #0284C7; max-width: 550px; margin: 0 auto; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    h1 { color: #38BDF8; font-size: 24px; margin-bottom: 10px; }
-    p { color: #94A3B8; font-size: 15px; line-height: 1.5; }
-    .btn { background: #16A34A; color: white; border: none; padding: 16px 32px; font-size: 16px; font-weight: 900; border-radius: 8px; cursor: pointer; margin-top: 20px; transition: transform 0.1s; }
-    .btn:active { transform: scale(0.98); }
-    .btn-copy { background: #0284C7; margin-left: 10px; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>🌪️ VayuSync README.md</h1>
-    <p>Your download should start automatically. If it didn't, click the button below to download the exact <b>README.md</b> file ready for GitHub:</p>
-    <div>
-      <button class="btn" onclick="triggerDownload()">📥 Download README.md</button>
-      <button class="btn btn-copy" onclick="copyContent()">📋 Copy to Clipboard</button>
-    </div>
-  </div>
-
-  <textarea id="readmeContent" style="display:none;"># 🌪️ VayuSync: Adaptive Meteorological Synthesis Engine
+# 🌪️ VayuSync: Adaptive Meteorological Synthesis Engine
 
 [![Python 3.14](https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -45,7 +20,7 @@
 
 ## 📌 Executive Summary
 
-During severe monsoonal weather, duty meteorologists face contradictory guidance from primary global numerical weather prediction models:
+During severe monsoonal weather, duty meteorologists face contradictory guidance from primary numerical weather prediction models:
 * **NOAA GFS v16 (Dynamical Physics):** Strictly enforces mass and hydrodynamic conservation equations but introduces convective phase displacements and over-predicts rainfall along steep orographic barriers such as the Western Ghats.
 * **ECMWF AIFS (Graph Neural NWP):** Accurately tracks large-scale synoptic state evolutions using graph neural networks but smooths localized convective rainfall peaks due to training loss functions.
 
