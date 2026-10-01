@@ -1,114 +1,71 @@
 # VayuSync
 
-### Sub-district meteorological synthesis & real-time monsoonal intelligence engine
+**Hybrid AI–NWP Multi-Model Forecast Blending System**  
+Smart India Hackathon 2026 · Problem Statement **26SIH082**
 
-<p align="center">
-  <img src="https://img.shields.io/badge/SIH-26081-7C3AED?style=for-the-badge" alt="SIH 26081"/>
-  <img src="https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.14"/>
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/NumPy-SIMD%20Vectorized-013243?style=for-the-badge&logo=numpy&logoColor=white" alt="NumPy SIMD"/>
-  <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"/>
-  <img src="https://img.shields.io/badge/HTML5%20Canvas-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5 Canvas"/>
-  <img src="https://img.shields.io/badge/Dark%20Console-0E0B16?style=for-the-badge" alt="Dark Console"/>
-</p>
+[![Live Demo](https://img.shields.io/badge/Live-Demo-00C853?style=for-the-badge)](https://vayusync-balh.onrender.com/)
+[![SIH](https://img.shields.io/badge/SIH-26SIH082-7C3AED?style=for-the-badge)](https://github.com/Samprit07/vayusync)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-**VayuSync** is an operational meteorological synthesis platform that bridges classical dynamical atmospheric physics (**NOAA GFS v16**) and global data-driven neural weather prediction (**ECMWF AIFS**).
+**VayuSync** dynamically blends classical numerical weather prediction (**NOAA GFS**) with data-driven neural weather prediction (**ECMWF AIFS**) using context-aware Softmax gating. It produces a single optimized forecast for rainfall, temperature, wind, humidity and pressure over the Indian domain, together with spatial model-weight maps and station-level verification against IMD-style ground truth.
 
-Built for **operational speed and statutory accountability**: dynamic Softmax gating against ground truth, sub-12ms village gazetteer downscaling, and instant alert workflows — without heavy GPU infrastructure.
+Live cockpit → [https://vayusync-balh.onrender.com/](https://vayusync-balh.onrender.com/)
 
 ---
 
-## Highlights
+## Problem it solves
 
-| Capability | What it delivers |
-|---|---|
-| **Dual-model synthesis** | Dynamic Softmax weighting balancing GFS physics with AIFS neural skill |
-| **Causal verification** | 7-day trailing residual window strictly free of future-data leakage |
-| **Sub-district drill-down** | 500k+ Indian village centroids resolved in under 12ms via embedded SQLite |
-| **Forecaster cockpit** | Client-side 2D Canvas isobar rendering with zero server rasterization lag |
-| **Statutory defensibility** | Cryptographic SHA-256 audit logs supporting Sec 163 BNSS disaster orders |
-| **Zero GPU footprint** | SIMD NumPy vectorization runs entirely on a commodity 2-core x86 CPU |
+Different forecast systems excel under different conditions (region, season, lead time, weather regime). A fixed average is suboptimal. VayuSync learns **when to trust which model** and forms a convex combination:
+
+\[
+\hat{y} = w_{\text{GFS}}\,F_{\text{GFS}} + w_{\text{AIFS}}\,F_{\text{AIFS}}, \qquad
+w_{\text{GFS}} + w_{\text{AIFS}} = 1,\quad w_i \ge 0
+\]
+
+Weights are produced by a lightweight adaptive gating network conditioned on location, lead time and inter-model spread.
+
+---
+
+## Key features
+
+| Feature | Description |
+|--------|-------------|
+| **Dual-model synthesis** | GFS (physics) + AIFS (neural) fused via temperature-scaled Softmax |
+| **Spatial weight maps** | Grid of \(w_{\text{GFS}}\) / \(w_{\text{AIFS}}\) showing regional model preference |
+| **Station drill-down** | Fast lookup of any Indian village / town / metro via embedded SQLite gazetteer + online fallback |
+| **Multi-variable support** | Rainfall, 2 m temperature, 10 m wind, relative humidity, MSLP |
+| **Lead-time horizons** | +6 h, +12 h, +24 h, +48 h |
+| **Verification metrics** | MAE of GFS, AIFS and blended field vs reference truth; skill improvement % |
+| **Operational cockpit** | Dark-mode browser UI (Plotly density maps, real-time station panel) |
+| **CPU-only path** | Pure NumPy vectorization — no GPU required |
 
 ---
 
 ## Architecture
 
-```mermaid
-flowchart TB
-    A["Operational Forecaster Cockpit<br/>HTML5 2D Canvas · Bootstrap 5 · GeoJSON contours"]
-    B["FastAPI ASGI Backend<br/>GRIB2 ingest · Dynamic Softmax gating · SQLite spatial lookup · SHA-256 audit"]
-    C["Data and Ingestion Engine<br/>NOAA GFS v16 · ECMWF AIFS · IMD AWS ground telemetry · 500k+ gazetteer"]
-
-    A -->|"REST + GeoJSON"| B
-    B --> C
 ```
-
----
-
-## What VayuSync does
-
-VayuSync is designed for **monsoon-season operations** where decisions must be fast, local, and defensible:
-
-1. **Ingest** multi-source forecast fields (GFS dynamical + AIFS neural) and ground telemetry  
-2. **Gate** model contributions with a causal Softmax residual window (no future leakage)  
-3. **Downscale** to sub-district / village centroids from an embedded spatial gazetteer  
-4. **Render** isobars and operational layers in a browser cockpit (Canvas, no server tiles)  
-5. **Audit** every synthesis and alert path with SHA-256 logs for statutory review  
-
----
-
-## Core modules
-
-### Dual-model synthesis engine
-- Blends **NOAA GFS v16** (physics-first) and **ECMWF AIFS** (data-driven skill)
-- **Dynamic Softmax gating** updates weights from recent residual performance against ground truth
-- Designed so neither model dominates blindly when local skill shifts during active monsoon phases
-
-### Causal verification window
-- Rolling **7-day trailing residual** evaluation
-- Strictly causal: verification never uses future observations relative to the decision time
-- Supports transparent model confidence for operational briefings
-
-### Sub-district gazetteer
-- Embedded **SQLite** spatial lookup over **500k+** Indian village centroids
-- Target resolution latency **under 12ms** for interactive drill-down
-- Enables village- and tehsil-scale products without external GIS servers
-
-### Forecaster cockpit
-- **HTML5 2D Canvas** isobar / contour rendering on the client
-- **GeoJSON** payloads from the API — no heavy server-side raster pipeline
-- Dark operational console UI for continuous monitoring
-
-### Statutory audit trail
-- **SHA-256** cryptographic logs of synthesis outputs and alert issuance
-- Oriented toward accountability workflows under **Sec 163 BNSS** disaster-order contexts
-- Replay-friendly audit records for post-event review
-
----
-
-## Quick start
-
-```bash
-# 1. Clone
-git clone https://github.com/samprit07/vayusync.git
-cd vayusync
-
-# 2. Environment
-python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# macOS / Linux
-source .venv/bin/activate
-
-pip install -r requirements.txt
-
-# 3. Run API + cockpit
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+┌─────────────────────────────────────────────────────────────┐
+│  Forecaster Cockpit (frontend/)                             │
+│  HTML · CSS · JS · Plotly  ·  station search · map views    │
+└──────────────────────────┬──────────────────────────────────┘
+                           │  REST (/api/forecast, /api/station)
+┌──────────────────────────▼──────────────────────────────────┐
+│  FastAPI Backend (backend/main.py)                          │
+│  CORS · static mount · gazetteer · geocoding cache          │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────────┐
+│  Adaptive Gating Engine (backend/ml_engine.py)              │
+│  Softmax network → w_GFS, w_AIFS → convex blend             │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────────┐
+│  Data Layer (data/)                                         │
+│  full_weather_cube.npy · gfs/aifs/imd grids · gazetteer.db  │
+└─────────────────────────────────────────────────────────────┘
 ```
-
-Open **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
-
-> Replace `YOUR_USERNAME/vayusync` with your actual GitHub path.
 
 ---
 
@@ -116,94 +73,142 @@ Open **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
 ```text
 vayusync/
-├── app/
-│   ├── main.py                 # FastAPI entry · CORS · static cockpit mount
-│   ├── synthesis/              # Softmax gating · residual window · blend logic
-│   ├── ingest/                 # GRIB2 / model field ingestion adapters
-│   ├── spatial/                # Village gazetteer · SQLite spatial queries
-│   ├── audit/                  # SHA-256 audit log writers
-│   └── routers/                # Forecast · lookup · alert · health APIs
-├── frontend/                   # Forecaster cockpit (Canvas · Bootstrap · dark UI)
+├── backend/
+│   ├── main.py              # FastAPI app, station lookup, API routes
+│   ├── ml_engine.py         # Adaptive Softmax gating + blend
+│   └── build_gazetteer.py   # Utility to rebuild village DB
+├── frontend/                # Operational cockpit (served as static files)
+│   ├── index.html
+│   ├── app.js
+│   ├── style.css
+│   └── logo-*.svg
 ├── data/
-│   ├── gazetteer/              # Village centroid SQLite / seed assets
-│   └── samples/                # Demo GRIB / GeoJSON fixtures (if bundled)
+│   ├── full_weather_cube.npy
+│   ├── gfs_grid.npy / aifs_grid.npy / imd_grid.npy
+│   ├── india_gazetteer.db   # ~50 MB village / place index
+│   ├── processed_aifs_india.nc
+│   └── resolved_stations.json
+├── app.py                   # Optional Streamlit demo portal
+├── api/index.py             # Thin entry for some hosts
+├── Procfile                 # Render / Heroku: uvicorn backend.main:app
 ├── requirements.txt
+├── LICENSE                  # MIT
 └── README.md
 ```
 
-*(Adjust folder names to match your repo if they differ slightly.)*
+---
+
+## Quick start (local)
+
+```bash
+git clone https://github.com/Samprit07/vayusync.git
+cd vayusync
+
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
+
+pip install -r requirements.txt
+# Additional runtime deps used by the live app:
+pip install fastapi uvicorn numpy plotly geopy streamlit
+
+# Start the FastAPI + cockpit server
+uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Open **http://127.0.0.1:8000**
+
+API docs (when running):  
+- Swagger → http://127.0.0.1:8000/docs  
+- ReDoc → http://127.0.0.1:8000/redoc  
+
+Optional Streamlit demo:
+
+```bash
+streamlit run app.py
+```
 
 ---
 
-## API surface (illustrative)
+## API endpoints
 
-| Area | Role |
-|------|------|
-| Health | Service liveness and ingest heartbeat |
-| Synthesis | Gated dual-model field / point forecasts |
-| Spatial lookup | Village / sub-district resolution under 12ms target |
-| Contours | GeoJSON isobar / layer payloads for Canvas |
-| Alerts | Threshold workflows with audit stamps |
-| Audit | SHA-256 log query / verification helpers |
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/forecast?lead_time=+24h&variable=Rainfall (mm)` | Full India grid: blended field, GFS weight map, MAE metrics |
+| `GET /api/station?query=Panaji&lead_time=+24h&variable=Rainfall (mm)` | Point forecast + model weights + observed reference for a named location |
 
-Interactive docs when the server is running:
+**Example response (station)**
 
-- Swagger UI → [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- ReDoc → [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+```json
+{
+  "status": "success",
+  "station_name": "Panaji, Goa",
+  "lat": 15.49,
+  "lon": 73.83,
+  "values": {
+    "gfs": 12.4,
+    "aifs": 15.1,
+    "blend": 14.2,
+    "observed": 13.8,
+    "w_gfs_pct": 38.0,
+    "w_aifs_pct": 62.0
+  }
+}
+```
+
+---
+
+## How the blending works
+
+1. **Ingest** pre-aligned GFS and AIFS fields (and a reference “truth” grid for verification).
+2. **Feature vector** at each grid cell: normalized latitude, longitude, lead time, inter-model spread.
+3. **AdaptiveGatingNetwork** (small MLP + Softmax) emits \(w_{\text{GFS}}, w_{\text{AIFS}}\).
+4. **Convex blend** \(\hat{y} = w_{\text{GFS}} F_{\text{GFS}} + w_{\text{AIFS}} F_{\text{AIFS}}\).
+5. **Verification** against the reference field → MAE and relative skill gain.
+
+Rainfall uses the stored multi-source cube; other variables are synthesised with physically plausible spatial structure for demonstration when full multi-variable historical archives are not yet ingested.
+
+---
+
+## Data sources (prototype)
+
+| Source | Role |
+|--------|------|
+| **NOAA GFS** | Dynamical NWP forecast fields |
+| **ECMWF AIFS** | AI / neural weather prediction fields |
+| **IMD-style grids** | Reference / verification rainfall (0.25°) |
+| **Indian village gazetteer** | Sub-district & place name → lat/lon (SQLite) |
+
+The repository ships with pre-processed NumPy cubes and a ready-to-use gazetteer so the demo runs offline after clone.
 
 ---
 
 ## Tech stack
 
-| Layer | Choices |
-|-------|---------|
-| API | FastAPI (ASGI), Pydantic |
-| Compute | NumPy SIMD vectorization (CPU-only path) |
-| Spatial | Embedded SQLite gazetteer |
-| Ingest | GRIB2-oriented model field pipelines |
-| UI | HTML5 Canvas, Bootstrap 5, dark operational console |
-| Integrity | SHA-256 audit logging |
+- **Backend**: FastAPI, NumPy, SQLite  
+- **Frontend**: Vanilla JS, Plotly.js, custom dark operational CSS  
+- **Optional UI**: Streamlit  
+- **Deployment**: Render (Procfile → `uvicorn backend.main:app`)
 
 ---
 
 ## Design principles
 
-1. **Physics + learning, not either/or** — GFS and AIFS are gated, not averaged blindly.  
-2. **Causal by construction** — verification windows never peek into the future.  
-3. **Locality first** — products must resolve to sub-district and village scale.  
-4. **Operational latency** — cockpit rendering stays on the client; lookups stay in-process.  
-5. **Defensible outputs** — every critical synthesis path is hash-audited for statutory review.  
-6. **Commodity hardware** — no GPU dependency for the core synthesis path.
-
----
-
-## Operational notes
-
-- **Monsoon focus** — synthesis and alerts are oriented toward active monsoonal regimes and rapid local escalation.  
-- **Ground truth coupling** — Softmax gates track residual skill against telemetry (e.g. IMD AWS-class signals where available).  
-- **CPU-only deployment** — suitable for constrained institutional or field-adjacent servers.  
-- **Audit retention** — retain SHA-256 logs according to your disaster-management record policy.
-
----
-
-## Problem alignment (SIH 2026)
-
-- Dual-source weather intelligence (dynamical + neural)  
-- Sub-district / village-scale actionable products  
-- Real-time operational cockpit for forecasters  
-- Transparent model weighting with causal verification  
-- Auditability suitable for statutory disaster workflows  
-- Efficient CPU-side numerical path (NumPy SIMD)
+1. **Physics + learning** — models are gated, never blindly averaged.  
+2. **Transparency** — every station query returns individual model values and the assigned weights.  
+3. **Locality** — products resolve to village / town scale via the gazetteer.  
+4. **Operational simplicity** — single process, static frontend, CPU-only math.  
+5. **Reproducibility** — frozen weather cube + deterministic gating seed for demos.
 
 ---
 
 ## License
 
-Prepared in the context of **Smart India Hackathon 2026**.  
-Add a formal license file if you open-source beyond the competition setting.
+MIT License © 2026 Samprit Dhara  
+See [LICENSE](LICENSE).
 
 ---
 
-<p align="center">
-  <strong>VayuSync</strong> — from global model fields to village-scale monsoonal decisions.
-</p>
+**VayuSync** — from global model fields to village-scale monsoonal decisions.
